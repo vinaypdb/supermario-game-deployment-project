@@ -1,12 +1,12 @@
-# 🔐 Connect to EC2 Instance via SSH using AWS CLI
+# 🔐 Connect to EC2 Instance via SSH (AWS CLI)
 
-This guide shows how to connect to your Ubuntu EC2 instance via SSH using AWS CLI and your `.pem` key pair.
+This guide walks you through securely connecting to your Ubuntu EC2 instance using SSH, AWS CLI, and your `.pem` key pair.
 
 ---
 
-## ✅ Step 1: Get the EC2 Public IP
+## ✅ Step 1: Retrieve Public IP of EC2 Instance
 
-Run the following command to retrieve the public IP address of your running EC2 instance:
+Use the following AWS CLI command to get the public IP of your running instance:
 
 ```bash
 aws ec2 describe-instances \
@@ -15,7 +15,7 @@ aws ec2 describe-instances \
   --output text
 ```
 
-This will return something like:
+📟 **Example Output:**
 
 ```bash
 13.235.117.105
@@ -23,35 +23,38 @@ This will return something like:
 
 ---
 
-## 🔒 Step 2: Set Permissions for the Key File
+## 🔒 Step 2: Set Key File Permissions
 
-Make sure your key pair file has the proper permissions. Replace the filename as needed:
+Ensure your SSH key file has secure permissions (required for SSH to work):
 
 ```bash
 chmod 400 eks-keypair.pem
 ```
 
+> Replace `eks-keypair.pem` with the actual filename of your key pair.
+
 ---
 
-## 🔗 Step 3: SSH into Your EC2 Instance
+## 🔗 Step 3: Connect to EC2 via SSH
 
-Use the following command to connect to your instance:
+Now connect to the instance using:
 
 ```bash
 ssh -i "eks-keypair.pem" ubuntu@13.235.117.105
 ```
 
-> 🔁 Replace `eks-keypair.pem` with your actual key file name.
+> ✅ Replace:
 >
-> 🌐 Replace `13.235.117.105` with the actual public IP address you obtained in Step 1.
+> * `eks-keypair.pem` with your private key filename
+> * `13.235.117.105` with your EC2 instance’s public IP
 
 ---
 
-## 📌 Notes
+## ℹ️ Additional Notes
 
-* Ensure your Security Group allows inbound traffic on port 22 (SSH).
-* Default user for Ubuntu AMI is `ubuntu`.
+* ✅ **Security Group:** Ensure it allows inbound traffic on port **22 (SSH)**.
+* 🧑‍💻 **Default Username:** For Ubuntu AMIs, the default SSH user is `ubuntu`.
 
 ---
 
-Happy SSH-ing! 🎉
+🎉 You are now connected to your EC2 instance!
