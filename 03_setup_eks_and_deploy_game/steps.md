@@ -1,4 +1,12 @@
-### 1. **Install Required Tools**
+# 🎮 Deploy Super Mario Game on EKS Using Terraform
+
+This guide walks you through the complete setup of an EKS cluster on AWS and deploying the Super Mario game using Terraform and Kubernetes.
+
+---
+
+## 📦 Step 1: Install Required Tools on EC2
+
+Update and install the following tools:
 
 ```bash
 # Update packages
@@ -15,34 +23,48 @@ unzip awscliv2.zip
 sudo ./aws/install
 
 # Install kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 ```
 
-### 2. **Configure AWS CLI**
+---
+
+## 🔧 Step 2: Configure AWS CLI
 
 ```bash
 aws configure
-# Enter Access Key, Secret, Region (ap-south-1)
+# Provide:
+# - AWS Access Key ID
+# - AWS Secret Access Key
+# - Region: ap-south-1
+# - Output format: json
 ```
 
-### 3. **Clone the Project Repository**
+---
+
+## 📅 Step 3: Clone the Project Repository
 
 ```bash
 git clone https://github.com/simplilearn10/supermario-game.git
 cd supermario-game/EKS-TF
 ```
 
-### 4. **Update Terraform Backend (optional)**
+---
 
-If you don't want to use `backend.tf` with S3:
+## 🗂️ Step 4: (Optional) Disable Terraform Backend Configuration
+
+If you don't want to use remote state with S3:
 
 ```bash
 mv backend.tf backend.tf-excluding
 terraform init -reconfigure
 ```
 
-### 5. \*\*Update Region in \*\***`provider.tf`**
+---
+
+## 🌍 Step 5: Update Provider Region
+
+Edit the `provider.tf` file to match your AWS region:
 
 ```hcl
 provider "aws" {
@@ -50,45 +72,56 @@ provider "aws" {
 }
 ```
 
-### 6. **Run Terraform Commands**
+---
+
+## 🚀 Step 6: Deploy Infrastructure Using Terraform
 
 ```bash
 terraform init
 terraform apply --auto-approve
 ```
 
-### 7. **Configure ****`kubectl`**** with EKS**
+---
+
+## 🔗 Step 7: Configure `kubectl` to Connect to EKS
 
 ```bash
 aws eks update-kubeconfig --region ap-south-1 --name EKS_CLOUD
 kubectl get nodes
 ```
 
-### 8. **Deploy Super Mario Game to EKS**
+> 🧪 Verify node connectivity with `kubectl get nodes`.
+
+---
+
+## 🎮 Step 8: Deploy Super Mario Game
 
 ```bash
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 ```
 
-### 9. **Access the Game**
+---
+
+## 🌐 Step 9: Access the Game in Your Browser
 
 ```bash
 kubectl get svc
-# Note the EXTERNAL-IP for mario-service and open it in a browser
 ```
+
+> 🔍 Copy the `EXTERNAL-IP` of `mario-service` and open it in your web browser to play the game.
 
 ---
 
 ## ✅ Final Output
 
-* **EKS Cluster** with nodes ready
-* **Pods running** for game deployment
-* **Service exposed** via LoadBalancer
-* **Playable game in browser** using public LoadBalancer URL
+* ✅ **EKS Cluster is up and running**
+* ✅ **Game pods are deployed successfully**
+* ✅ **Service is exposed via LoadBalancer**
+* ✅ **Game is accessible through a public URL**
 
 ---
 
-## 🏁 Project Completed!
+## 🏊 Project Completed
 
----
+Enjoy your Super Mario game hosted on a Kubernetes-managed AWS infrastructure! 🎉
