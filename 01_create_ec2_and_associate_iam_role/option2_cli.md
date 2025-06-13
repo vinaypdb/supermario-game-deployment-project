@@ -1,31 +1,43 @@
-# EC2 Instance Creation with IAM Role using AWS CLI
+# 🧱 Option 2: Create EC2 Instance with IAM Role via AWS CLI
 
-This guide explains how to create an IAM Role and launch an EC2 instance using the AWS CLI. These instructions are well-documented to ensure reproducibility for others following the project.
+This document provides a fully scripted, reproducible method to create an EC2 instance and associate it with an IAM role using the AWS CLI. This is particularly useful for automation and infrastructure-as-code pipelines.
 
 ---
 
 ## 📌 Prerequisites
 
-* AWS account with programmatic access (Access Key ID and Secret Access Key)
-* AWS CLI installed and configured (`aws configure`)
-* Proper IAM permissions to create roles and EC2 instances
+Before you begin, make sure the following requirements are met:
+
+* ✅ AWS CLI installed and configured (`aws configure`)
+* ✅ IAM credentials with permissions to manage EC2 and IAM
+* ✅ A key pair already created in your AWS region (for SSH access)
 
 ---
 
 ## 🛠️ Step-by-Step Instructions
 
-### Step 1: Configure AWS CLI
+### 🔧 Step 1: Configure AWS CLI
+
+**🌟 Why?**
+To authenticate and set your default region/profile for all subsequent AWS CLI commands.
 
 ```bash
 aws configure
-# Enter your AWS Access Key, Secret Key, region (e.g. ap-south-1), and output format (json)
+# Input your:
+# - AWS Access Key
+# - AWS Secret Key
+# - Region (e.g. ap-south-1)
+# - Output format (e.g. json)
 ```
 
 ---
 
-### Step 2: Create IAM Role for EC2
+### 🔐 Step 2: Create IAM Role and Instance Profile
 
-1. **Create trust policy** (allows EC2 to assume this role):
+#### 2.1 Define Trust Policy
+
+**🌟 Why?**
+Allows EC2 instances to assume the role securely.
 
 ```bash
 cat > trust-policy.json <<EOF
@@ -44,7 +56,7 @@ cat > trust-policy.json <<EOF
 EOF
 ```
 
-2. **Create IAM Role**:
+#### 2.2 Create IAM Role
 
 ```bash
 aws iam create-role \
@@ -52,7 +64,7 @@ aws iam create-role \
   --assume-role-policy-document file://trust-policy.json
 ```
 
-3. **Attach policies to the role**:
+#### 2.3 Attach Required Policies
 
 ```bash
 aws iam attach-role-policy --role-name EC2AdminEKSRole --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
@@ -63,50 +75,63 @@ aws iam attach-role-policy --role-name EC2AdminEKSRole --policy-arn arn:aws:iam:
 aws iam attach-role-policy --role-name EC2AdminEKSRole --policy-arn arn:aws:iam::aws:policy/AmazonEKSServicePolicy
 ```
 
-4. **Create instance profile and attach role to it**:
+#### 2.4 Create Instance Profile and Attach Role
 
 ```bash
 aws iam create-instance-profile --instance-profile-name EC2AdminEKSProfile
+
 aws iam add-role-to-instance-profile \
   --instance-profile-name EC2AdminEKSProfile \
   --role-name EC2AdminEKSRole
 ```
 
-> 🔄 Wait a few seconds for the instance profile to be fully available.
+> 🕒 **Note:** Wait 10–20 seconds for the instance profile to be fully available before launching the instance.
 
 ---
 
-### Step 3: Launch EC2 Instance with IAM Role
+### 🚀 Step 3: Launch EC2 Instance with IAM Role
+
+**🌟 Why?**
+This EC2 instance will act as your base to run Terraform, interact with EKS, and deploy applications.
 
 ```bash
 aws ec2 run-instances \
-  --image-id ami-xxxxxxxxxxxxxxxxx \  # Use Ubuntu 22.04 AMI ID for your region
+  --image-id ami-xxxxxxxxxxxxxxxxx \         # Ubuntu 22.04 AMI ID for your region
   --instance-type t2.micro \
   --iam-instance-profile Name=EC2AdminEKSProfile \
-  --key-name your-keypair-name \  # Replace with your existing keypair
-  --security-group-ids sg-xxxxxxxxxxxxxxxxx \  # Must allow port 22 (SSH) and 80 (HTTP)
+  --key-name your-keypair-name \             # Replace with your actual key pair
+  --security-group-ids sg-xxxxxxxxxxxxxxxxx \  # SG should allow port 22 (SSH), 80 (HTTP)
   --subnet-id subnet-xxxxxxxxxxxxxxxxx \
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=EKS-Setup-Node}]'
 ```
 
 ---
 
-## ✅ Result
+## ✅ Output
 
-* EC2 instance with IAM role capable of managing EKS, EC2, and S3
-* Easily SSH into it and begin deploying infrastructure via Terraform
+After completion, you will have:
+
+* An EC2 instance running Ubuntu 22.04
+* IAM role with access to EKS, EC2, and S3
+* SSH-ready instance for further automation or deployment
 
 ---
 
 ## 📘 Notes
 
-* To get the correct **Ubuntu 22.04 AMI ID**, visit [https://cloud-images.ubuntu.com/locator/](https://cloud-images.ubuntu.com/locator/)
-* You can verify the IAM role is associated by describing the instance:
+* To find the correct **Ubuntu 22.04 AMI ID**, use:
+  [https://cloud-images.ubuntu.com/locator/](https://cloud-images.ubuntu.com/locator/)
+
+* To verify the IAM role was attached correctly:
 
 ```bash
-aws ec2 describe-instances --query "Reservations[*].Instances[*].[InstanceId,IamInstanceProfile.Arn]" --output table
+aws ec2 describe-instances \
+  --query "Reservations[*].Instances[*].[InstanceId,IamInstanceProfile.Arn]" \
+  --output table
 ```
 
 ---
 
+## 🛍️ Next Step
 
+👉 [Connect to the EC2 instance via SSH](../02_Connect_EC2_through_SSH/steps.md)
